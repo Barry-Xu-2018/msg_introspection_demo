@@ -42,6 +42,8 @@ private:
     std::shared_ptr<const rclcpp::SerializedMessage> message, const rclcpp::MessageInfo &)
   {
     RCLCPP_INFO(this->get_logger(), "+++ topic_callback");
+
+    // Allocating memory required for deserialization
     auto deserialized_message = std::shared_ptr<uint8_t[]>(
       new uint8_t[members_->size_of_],
       [fini_function = members_->fini_function](uint8_t * msg) {
@@ -49,9 +51,11 @@ private:
       delete[] msg;
     });
 
+    // Initialize the allocated memory
     members_->init_function(
       deserialized_message.get(), rosidl_runtime_cpp::MessageInitialization::ZERO);
 
+    // Deserialize the received message
     rmw_ret_t ret =
       rmw_deserialize(
         &message->get_rcl_serialized_message(),
@@ -62,6 +66,8 @@ private:
       return;
     }
 
+    // In this example, the offset is fixed, so it can be calculated in advance and doesn't need to
+    // be placed in this callback.
     for (size_t i = 0; i < members_->member_count_; i++) {
       if (std::strcmp(members_->members_[i].name_, "temperature") == 0) {
         if (members_->members_[i].type_id_ == rosidl_typesupport_introspection_cpp::ROS_TYPE_FLOAT64) {
