@@ -37,7 +37,7 @@ target_link_libraries(publisher ${cpp_typesupport_target})
 
 install(TARGETS
   publisher
-#  subscriber
+  subscriber
   DESTINATION lib/${PROJECT_NAME}
 )
 
